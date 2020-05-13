@@ -1,0 +1,58 @@
+## Packages.
+library(Seurat)
+library(ggplot2)
+
+## Get inDrop files. 
+all_files <- list.files('R/Whelan_scRNA/CountedFiles_Matrix/.')
+
+## Initialize file list and upload all files. 
+seurat_list <- c()
+for (x in all_files){
+  y <- paste0('R/Whelan_scRNA/CountedFiles_Matrix/',x)
+  z <- read.table(file = y, sep = '\t', header = T, row.names = 1, as.is = T)
+  seurat_list <- append(seurat_list,CreateSeuratObject(z, assay = "RNA",
+                                                       min.cells = 0, min.features = 0, names.field = 1,
+                                                       names.delim = "_", meta.data = NULL))
+}
+
+## QC and pre-process for all files.
+# Old cells.
+
+done_list <- c()
+MTgenes <- c('Atp8','Atp6','COX1','COX2','COX3','CYTB','ND1','ND2','ND3','ND4L','ND4','ND5','ND6','Rnr2')
+
+for (x in seurat_list[1:6]){
+  age <- sample(c("Old"),size = length(colnames(x)),replace = TRUE)
+  names(age) <- colnames(x)
+  x <- AddMetaData(x,status,col.name = 'Age')
+  x <- NormalizeData(x)
+  MTgenes_x <- MTgenes[MTgenes %in% rownames(x)]
+  x[['P.Mito']] <- PercentageFeatureSet(x, features = MTgenes_x)
+  x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  done_list <- append(done_list,x)
+}
+
+for (x in seurat_list[7:12]){
+  age <- sample(c("Young"),size = length(colnames(x)),replace = TRUE)
+  names(age) <- colnames(x)
+  x <- AddMetaData(x,status,col.name = 'Age')
+  x <- NormalizeData(x)
+  MTgenes_x <- MTgenes[MTgenes %in% rownames(x)]
+  x[['P.Mito']] <- PercentageFeatureSet(x, features = MTgenes_x)
+  x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  done_list <- append(done_list,x)
+}
+
+## Get anchors & integrate data.
+int.anchors <- FindIntegrationAnchors(object.list = done_list, dims = 1:30)
+ovy.int <- IntegrateData(anchorset = int.anchors, dims = 1:30)
+DefaultAssay(ovy.int) <- "integrated"
+ovy.int <- ScaleData(ovy.int, verbose = FALSE)
+ovy.int <- RunPCA(ovy.int, npcs = 30, verbose = FALSE)
+ovy.int <- RunUMAP(ovy.int, reduction = "pca", dims = 1:20)
+ovy.int <- FindNeighbors(ovy.int, reduction = "pca", dims = 1:20)
+ovy.int <- FindClusters(ovy.int, resolution = 0.5)
+
+## 
