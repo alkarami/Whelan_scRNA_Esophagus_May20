@@ -1,6 +1,6 @@
 ## Packages.
 library(Seurat)
-library(ggplot2)
+library(cowplot)
 
 ## Get inDrop files. 
 all_files <- list.files('R/Whelan_scRNA/CountedFiles_Matrix/.')
@@ -55,4 +55,14 @@ ovy.int <- RunUMAP(ovy.int, reduction = "pca", dims = 1:20)
 ovy.int <- FindNeighbors(ovy.int, reduction = "pca", dims = 1:20)
 ovy.int <- FindClusters(ovy.int, resolution = 0.5)
 
-## 
+## Visualize cells in UMAP.
+DimPlot(ovy.int, split.by = 'Age')
+
+## Save all clusters.
+save(ovy.int, file = 'ovy.int')
+
+## Subset out immune cells for epithelium-exclusive downstream analyses and save.
+## Also excluded is cluster 7, which - given its higher mitochondrial content and lower feature expression - is likely dead or 
+## dying cells.
+ovy.epi <- subset(ovy.int, idents = c(0,1,2,3,4,5,6,8,9))
+save(ovy.epi, file = 'ovy.epi')
