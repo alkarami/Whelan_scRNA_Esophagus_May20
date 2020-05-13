@@ -1,6 +1,4 @@
 # Whelan_scRNA_Esophagus_May20
-Seurat and Monocle commands for the Whelan Lab scRNA analysis on the murine esophageal epithelium.
-
 This repository contains the bash command lines for processing the raw data and R command lines for the analyses that were generated for the Whelan Lab paper <>. Raw data and matrices are available in GEO <>.
 Analyses were done chiefly using Seurat(v3) and Monocle(v2). Additional libraries are specified throughout. 
 
