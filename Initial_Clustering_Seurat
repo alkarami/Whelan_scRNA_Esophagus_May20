@@ -1,6 +1,6 @@
 ## Packages.
 library(Seurat)
-library(cowplot)
+library(dplyr)
 
 ## Get inDrop files. 
 all_files <- list.files('R/Whelan_scRNA/CountedFiles_Matrix/.')
@@ -58,11 +58,39 @@ ovy.int <- FindClusters(ovy.int, resolution = 0.5)
 ## Visualize cells in UMAP.
 DimPlot(ovy.int, split.by = 'Age')
 
-## Save all clusters.
+## Perform post-clustering QC.
+# Unique transcripts.
+VlnPlot(ovy.int, features = c('nFeature_RNA'))
+# Mitochondrial expression.
+VlnPlot(ovy.int, features = c('P.Mito'))
+# Sample-wise cell distribution in clusters. 
+DimPlot(ovy.int, group.by = 'orig.ident')
+
+## Cluster 7 is likely dead or dying cells, given elevated mitochondrial content and feature expression. Subset out.
+ovy.int <- subset(ovy.int, subset = c(0,1,2,3,4,5,6,8,9,10))
+
+## Save clean clusters.
 save(ovy.int, file = 'ovy.int')
 
+## Identify strong UMAP contributor genes.
+DimHeatmap(ovy.int, reduction = 'umap', projected = T, dims = 1, cells = 1000, balanced = T, fast = F)+scale_fill_gradientn(colors = c("blue", "white", "red"))
+
+## Change Seurat assay into un-integrated data. 
+DefaultAssay(ovy.int) <- 'RNA'
+
+## Visualize expression of basal and superficial markers that were identified as strong UMAP contributors.
+FeaturePlot(ovy.int, features = c('Krt5','Krtdap'))
+
+## Rename clusters based on marker expression.
+ovy.int$NamedTypes <- revalue(ovy.epi$seurat_clusters, replace = c('0' = 'Basal-1','1' = 'Suprabasal','3' = 'Basal-2','4' = 'Superficial-2','5' = 'Basal-3','6' = 'Basal-4','8' = 'Basal-5','9' = 'Immune','10' = 'Fibroblast'))
+
+## Identify cluster markers, and visualize the top 5. Write out the differentially expressed genes into file for IPA analyses. 
+bmarks <- FindAllMarkers(ovy.int, assay = 'RNA', test.use = 'MAST')
+write.csv(as.data.frame(bmarks), file = 'ClusterWise_DEGs_Whelan_scEso.csv')
+heatmarkers <-bmarks[which(bmarks$p_val_adj<0.05),] %>% group_by(cluster) %>% top_n(n = 5, wt = avg_logFC)
+bavex <- AverageExpression(ovy.int, return.seurat = T)
+DoHeatmap(object = bavex, features = heatmarkers$gene, assay = 'RNA', label = F, draw.lines = F, group.colors = c('Basal-1' = 'steelblue', 'Basal-2' = 'deeppink2', 'Basal-3' = 'green3', 'Basal-4' = 'orange', 'Basal-5' = 'red', 'Intermediate' = 'black','Differentiating-1' = 'darkviolet','Differentiating-2'='gold1','Fibroblast' = 'grey55','Immune'='grey') )+scale_fill_gradientn(colors = c("blue", "white", "red"))
+
 ## Subset out immune cells for epithelium-exclusive downstream analyses and save.
-## Also excluded is cluster 7, which - given its higher mitochondrial content and lower feature expression - is likely dead or 
-## dying cells.
-ovy.epi <- subset(ovy.int, idents = c(0,1,2,3,4,5,6,8,9))
+ovy.epi <- subset(ovy.int, idents = c('Basal-1','Basal-2','Basal-3','Basal-4','Basal-5','Suprabasal','Superficial-1','Superficial-2'))
 save(ovy.epi, file = 'ovy.epi')
