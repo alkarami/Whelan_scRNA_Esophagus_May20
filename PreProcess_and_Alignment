@@ -1,0 +1,37 @@
+#!/bin/bash
+
+mkdir ExtractedFastqs
+for f1 in *_R1_001.fastq.gz
+do
+	f2=${f1%%_R1_001.fastq.gz}"_R2_001.fastq.gz"
+        umi_tools whitelist -I $f1 --bc-pattern="(?P<cell_1>.{8,12})(?P<discard_1>GAGTGATTGCTTGTGACGCCTT){s<=2}(?P<cell_2>.{8})(?P<umi_1>.{6})T{3}.*" --extract-method=regex --log2stderr "log_$f2" > whitelist.txt 
+	umi_tools extract -I $f2 --bc-pattern2="(?P<cell_1>.{8,12})(?P<discard_1>GAGTGATTGCTTGTGACGCCTT){s<=2}(?P<cell_2>.{8})(?P<umi_1>.{6})T{3}.*" --extract-method=regex --read2-in="$f2" --stdout="extracted_$f1" --read2-out="extracted_$f2" --error-correct-cell --filter-cell-barcode --whitelist=whitelist.txt  
+	mv "extracted_$f1" ExtractedFastqs
+	mv "extracted_$f2" ExtractedFastqs
+done
+
+cd ExtractedFastqs
+
+for f1 in *_R1_001.fastq.gz
+do
+	f2=${f1%%_R1_001.fastq.gz}"_R2_001.fastq.gz"
+	f3=${f1%%_R1_001.fastq.gz}
+        STAR-2.7.3a/source/STAR --runThreadN 16 --genomeDir $1 --readFilesIn $f1 $f2 --readFilesCommand zcat --outFileNamePrefix "$f3" --outFilterMultimapNmax 1 --outSAMtype BAM SortedByCoordinate
+done
+
+for f1 in *.bam
+do
+	subread-2.0.0-source/bin/featureCounts -a $1 -g gene_name -o "FC_$f1" -R BAM $f1 -T 16
+	samtools sort "$f1.featureCounts.bam" -o "sorted_FC_$f1"
+	samtools index "sorted_FC_$f1"
+	mv "sorted_FC_$f1" FC_Out_Genes
+done
+
+mkdir CountedFiles_Matrix
+
+for f1 in *.bam
+do
+	f2=${f1%%.Aligned.sortedByCoord.out.bam}
+        umi_tools count --per-gene --gene-tag=XT --assigned-status-tag=XS --per-cell --wide-format-cell-counts -I $f1 -S "m_counts_$f2.tsv"
+	mv "m_counts_$f2.tsv" CountedFiles_Matrix
+done
