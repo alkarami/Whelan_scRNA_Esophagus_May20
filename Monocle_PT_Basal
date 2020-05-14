@@ -1,0 +1,23 @@
+## Load monocle and Seurat.
+library(monocle)
+library(Seurat)
+library(cowplot)
+
+## Load epithelial data.
+load('ovy.epi')
+
+## Use the integrated assay for pseudotime, and subset out non-basal cells.
+ovy.b <- subset(ovy.epi, subset = c('Basal-1','Basal-2','Basal-3','Basal-4','Basal-5'))
+
+## Using the monocon function defined in Monocle_PT_Epi, convert the basal cells for pseudotime with Monocle
+bmono <- monocon(ovy.b)
+
+## Visualize trajectory and the localization of proliferation marker Mki67. 
+p1 <- plot_cell_trajectory(bmono, color_by = 'NamedTypes')
+p2 <- plot_cell_trajectory(bmono, markers = 'Mki67', use_color_gradient = T)
+plot_grid(p1,p2)
+
+## Root trajectory at the localization of proliferation (State 10)
+bmono <- orderCells(bmono, root_state = 10)
+
+## 5 branchpoints should be identified. Perform BEAM 
