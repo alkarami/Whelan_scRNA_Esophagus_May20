@@ -1,3 +1,8 @@
+## Libraries.
+library(Seurat)
+library(monocle)
+library(cowplot)
+
 ############## newimport imports Seurat v3 object as Monocle2. Credits to Lina Kroehling (https://www.biostars.org/u/52871/). ##########
 newimport <- function(otherCDS, import_all = T) {
   if(class(otherCDS)[1] == 'Seurat') {
@@ -168,7 +173,6 @@ DefaultAssay(ovy.epi) <- 'integrated'
 wtmono <- monocon(ovy.epi)
 
 ## Visualize the pseudotime trajectory and the localization of Mki67, a proliferation marker. 
-library(cowplot)
 p1 <- plot_cell_trajectory(wtmono, color_by = 'NamedTypes')
 p2 <- plot_cell_trajectory(wtmono, markers = 'Mki67', use_color_gradient = T)
 plot_grid(p1,p2)
