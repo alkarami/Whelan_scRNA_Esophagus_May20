@@ -11,3 +11,14 @@ There are 5 walkthroughs:
 
 4. Monocle_PT_Basal (Pseudotime for just basal cells, and BEAMs associated with it)
 5. Downstream_Seurat (Additional Seurat analyses for data validation, miscellaneous differential expression tests, and marker validations)
+
+Major requirements: 
+
+Bash: 
+UMI-Tools: https://umi-tools.readthedocs.io/en/latest/
+STAR: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+Subread: http://subread.sourceforge.net/
+
+R: 
+Seurat: https://satijalab.org/seurat/
+Monocle: http://cole-trapnell-lab.github.io/monocle-release/docs_mobile/
