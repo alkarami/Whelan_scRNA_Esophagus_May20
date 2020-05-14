@@ -56,5 +56,11 @@ DotPlot(ovy.epi, features = diffmarkers, group.by = 'NamedTypes', assay = 'RNA',
 ### Find the most cluster-exclusive markers. 
 ## These markers will be ranked by how lowly they're expressed in clusters other than the one in question.
 
-
+# Run DEG tests on all clusters, but specify lower minimal detection.
+bmarks <- FindAllMarkers(ovy.int, assay = 'RNA', test.use = 'MAST', min.pct = 0)
+# Rank by lowest expression outside of it.
+heatmarkers <-bmarks[which(bmarks$p_val_adj<0.05),] %>% group_by(cluster) %>% top_n(n = -5, wt = pct.2)
+bavex <- AverageExpression(ovy.epi, return.seurat = T)
+# Visualize.
+DoHeatmap(object = bavex, features = heatmarkers$gene, assay = 'RNA', label = F, draw.lines = F)+scale_fill_gradientn(colors = c("blue", "white", "red"))
 
