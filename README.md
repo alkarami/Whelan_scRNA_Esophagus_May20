@@ -6,5 +6,6 @@ There are 5 walkthroughs:
 1. QC_and_Alignment (Bash lines for read deconvolution, genome alignment, feature counting, and matrix generation for downstream analyses)
 2. Initial_clustering_Seurat (Initial pre-processing and scRNA-Seq QC using Seurat, as well as some early visualizations of the data)
 3. Monocle_PT_Epi (Pseudotime command lines using Monocle for all epithelial cells, along with BEAM)
+*Note that functions defined in Monocle_PT_Epi are used in Monocle_PT_Basal*
 4. Monocle_PT_Basal (Pseudotime for just basal cells, and BEAMs associated with it)
 5. Downstream_Seurat (Additional Seurat analyses for data validation, miscellaneous differential expression tests, and marker validations)
