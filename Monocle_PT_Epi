@@ -191,13 +191,10 @@ beamgenes <- plot_genes_branched_heatmap(wtmono[row.names(BEAM_1_sig),], branch_
                                          branch_point = 1, cores = 4, use_gene_short_name = T, show_rownames = F, return_heatmap = T, num_clusters = 7)
 
 beamdf <- data.frame(cluster = beamgenes$annotation_row$Cluster,genes = row.names(beamgenes$annotation_row),stringsAsFactors = FALSE)
-write.csv(beamdf[which(beamdf$cluster==1),], file = 'AllBeam_C1.csv')
-write.csv(beamdf[which(beamdf$cluster==2),], file = 'AllBeam_C2.csv')
-write.csv(beamdf[which(beamdf$cluster==3),], file = 'AllBeam_C3.csv')
-write.csv(beamdf[which(beamdf$cluster==4),], file = 'AllBeam_C4.csv')
-write.csv(beamdf[which(beamdf$cluster==5),], file = 'AllBeam_C5.csv')
-write.csv(beamdf[which(beamdf$cluster==6),], file = 'AllBeam_C6.csv')
-write.csv(beamdf[which(beamdf$cluster==7),], file = 'AllBeam_C7.csv')
+for(x in unique(beamdf$cluster)){
+  filename <- paste0('AllBeam_C',x,'.csv')
+  write.csv(beamdf[which(beamdf$cluster==x),] file = filename)
+}
 
 ## Save the object.
 save(wtmono, file = 'wtmono')
