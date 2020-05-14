@@ -21,3 +21,22 @@ plot_grid(p1,p2)
 bmono <- orderCells(bmono, root_state = 10)
 
 ## 5 branchpoints should be identified. Perform BEAM 
+
+############################### BEAMer performs BEAM and returns significantly branch-dependent genes (p<0.05) #########################
+
+BEAMer <- function(object,branchpoint){
+  BEAM_x <- BEAM(object, branch_point = branchpoint, cores = 4)
+  BEAM_x <- BEAM_x[order(BEAM_x$qval),]
+  BEAM_x <- BEAM_x[,c("gene_short_name", "pval", "qval")]
+  BEAM_x_sig <- BEAM_x[which(BEAM_x$qval<0.05),]
+  return(BEAM_1_sig)}
+
+############################### BWrite writes out gene clusters from a BEAM-derived heatmap object in .csv format ######################
+Bwrite <- function(beamdf,branchpoint){
+  for(x in unique(beamdf$cluster)){
+    filename <- paste0('Basal_BEAM_',branchpoint,'_C',x,'.csv')
+    write.csv(beamdf[which(beamdf$cluster==x),] file = filename)}}
+
+########################################################################################################################################
+
+## Do BEAM on all 5 branchpoints. 
