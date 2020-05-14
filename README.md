@@ -15,10 +15,15 @@ There are 5 walkthroughs:
 Major requirements: 
 
 Bash: 
+
 UMI-Tools: https://umi-tools.readthedocs.io/en/latest/
+
 STAR: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+
 Subread: http://subread.sourceforge.net/
 
 R: 
+
 Seurat: https://satijalab.org/seurat/
+
 Monocle: http://cole-trapnell-lab.github.io/monocle-release/docs_mobile/
