@@ -1,4 +1,4 @@
-## Libraries.
+## Packages.
 library(Seurat)
 library(monocle)
 library(cowplot)
