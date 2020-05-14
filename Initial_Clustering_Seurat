@@ -48,14 +48,18 @@ for (x in seurat_list[7:12]){
   done_list <- append(done_list,x)
 }
 
-## Get anchors & integrate data.
+## Get anchors & integrate data according to the anchors.
 int.anchors <- FindIntegrationAnchors(object.list = done_list, dims = 1:30)
 ovy.int <- IntegrateData(anchorset = int.anchors, dims = 1:30)
 DefaultAssay(ovy.int) <- "integrated"
+## Scale the integrated data matrix.
 ovy.int <- ScaleData(ovy.int, verbose = FALSE)
-ovy.int <- RunPCA(ovy.int, npcs = 30, verbose = FALSE)
+## Perform PCA and produce the first 20 principal components.
+ovy.int <- RunPCA(ovy.int, npcs = 20, verbose = FALSE)
+## Perform UMAP from the resulting PCA PC's.
 ovy.int <- RunUMAP(ovy.int, reduction = "pca", dims = 1:20)
-ovy.int <- FindNeighbors(ovy.int, reduction = "pca", dims = 1:20)
+## Construct SNN to calculate clusters of cells. 
+ovy.int <- FindNeighbors(ovy.int, dims = 1:20)
 ovy.int <- FindClusters(ovy.int, resolution = 0.5)
 
 ## Visualize cells in UMAP.
