@@ -53,7 +53,8 @@ DotPlot(ovy.epi, features = basalmarkers, group.by = 'NamedTypes', assay = 'RNA'
 diffmarkers <- c('Ivl','Flg','Fst','Lor','Krt4','Krt13','Krtdap')
 DotPlot(ovy.epi, features = diffmarkers, group.by = 'NamedTypes', assay = 'RNA', cols = c('blue','red'))+ RotatedAxis()
 
-### Find the most cluster-exclusive markers. 
+### FIND CLUSTER-EXCLUSIVE MARKERS
+
 ## These markers will be ranked by how lowly they're expressed in clusters other than the one in question.
 
 # Run DEG tests on all clusters, but specify lower minimal detection.
