@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Identify QC stats of all the fastqs with fastqc. 
+for f1 in *.fastq.gz
+do
+	fastqc f1
+done
+
+# Check out the htmls generated for all the fastqc runs. 
+
 # First, use UMI-tools to whitelist likely barcodes and extract them from the reads to move them onto the tag on the FASTQ's reads.
 # Barcodes are on R2, so we perform whitelisting on R2s using the regex pattern shown. We then extract from R1. 
 
