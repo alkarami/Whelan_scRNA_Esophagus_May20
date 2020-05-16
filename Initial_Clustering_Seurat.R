@@ -18,7 +18,8 @@ for (x in all_files){
 ## QC and pre-process for all files.
 # Pre-process: Add metadata to each file, normalize the matrices with log1p transformation (NormalizeData()), calculate percentage
 # of transcripts expressing mitochondrial genes as percent of total cell expression (PercentageFeatureSet()), subset cells with
-# less than 250 or more than 2500 unique transcripts, and finally find 2000 most variable features in the matrix.
+# less than 250 or more than 2500 unique transcripts and more than 20% mitochondrial expression, and finally find 2000 most 
+# variable features in the matrix.
 done_list <- c()
 MTgenes <- c('Atp8','Atp6','COX1','COX2','COX3','CYTB','ND1','ND2','ND3','ND4L','ND4','ND5','ND6','Rnr2')
 
@@ -99,17 +100,19 @@ bavex <- AverageExpression(ovy.int, return.seurat = T)
 DoHeatmap(object = bavex, features = heatmarkers$gene, assay = 'RNA', label = F, draw.lines = F, group.colors = c('Basal-1' = 'steelblue', 'Basal-2' = 'deeppink2', 'Basal-3' = 'green3', 'Basal-4' = 'orange', 'Basal-5' = 'red', 'Intermediate' = 'black','Differentiating-1' = 'darkviolet','Differentiating-2'='gold1','Fibroblast' = 'grey55','Immune'='grey') )+scale_fill_gradientn(colors = c("blue", "white", "red"))
 
 ## Assess the cell cycle phase of each cell using the expression of cell cycle related genes. 
+# Define genes that contribute to the S phase.
 sgenes <- c()
 for (x in cc.genes$s.genes){
   sgenes <- append(sgenes,paste(substring(x,1,1),tolower(substring(x,2)), sep = ''))
 }
+# Define genes that contribute to the G2/M phases.
 g2mgenes <- c()
 for (x in cc.genes$g2m.genes){
   g2mgenes <- append(g2mgenes,paste(substring(x,1,1),tolower(substring(x,2)), sep = ''))
 }
+# Calculate S phase and G2/M scores for each cell. 
 ovy.epi <- CellCycleScoring(ovy.epi, s.features = sgenes, g2m.features = g2mgenes, set.ident = F)
-
-## Visualize cell cycle phases.
+# Visualize cell cycle phases.
 DimPlot(ovy.epi, group.by = 'Phase')
 
 ## Subset out immune cells for epithelium-exclusive downstream analyses and save.
