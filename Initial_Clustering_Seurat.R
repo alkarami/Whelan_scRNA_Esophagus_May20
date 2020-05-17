@@ -11,7 +11,7 @@ for (x in all_files){
   y <- paste0('R/Whelan_scRNA/CountedFiles_Matrix/',x)
   z <- read.table(file = y, sep = '\t', header = T, row.names = 1, as.is = T)
   seurat_list <- append(seurat_list,CreateSeuratObject(z, assay = "RNA",
-                                                       min.cells = 0, min.features = 0, names.field = 1,
+                                                       min.cells = 0, min.features = 3, names.field = 1,
                                                        names.delim = "_", meta.data = NULL))
 }
 
