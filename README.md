@@ -16,14 +16,14 @@ Major requirements:
 
 Bash: 
 
-UMI-Tools: https://umi-tools.readthedocs.io/en/latest/
+UMI-Tools (1.0.0): https://umi-tools.readthedocs.io/en/latest/
 
-STAR: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+STAR (2.7): https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
-Subread: http://subread.sourceforge.net/
+Subread (2.0): http://subread.sourceforge.net/
 
 R: 
 
-Seurat: https://satijalab.org/seurat/
+Seurat (3.1.4): https://satijalab.org/seurat/
 
-Monocle: http://cole-trapnell-lab.github.io/monocle-release/docs_mobile/
+Monocle (2.16.0): http://cole-trapnell-lab.github.io/monocle-release/docs_mobile/
