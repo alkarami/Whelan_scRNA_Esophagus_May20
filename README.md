@@ -2,7 +2,7 @@
 This repository contains the bash command lines for processing the raw data and R command lines for the analyses that were generated for the Whelan Lab paper <>. Raw data and matrices are available in GEO <>.
 Analyses were done chiefly using Seurat(v3) and Monocle(v2). Additional libraries are specified throughout. 
 
-There are 5 walkthroughs:
+ <font size="6"> There are 5 walkthroughs </font>
 1. PreProcess_and_Alignment (Bash lines for read deconvolution, genome alignment, feature counting, and matrix generation for downstream analyses)
 2. Initial_clustering_Seurat (Initial pre-processing and scRNA-Seq QC using Seurat, as well as some early visualizations of the data)
 3. Monocle_PT_Epi (Pseudotime command lines using Monocle for all epithelial cells, along with BEAM)
