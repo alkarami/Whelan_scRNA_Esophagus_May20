@@ -21,7 +21,6 @@ for (x in all_files){
 # less than 250 or more than 2500 unique transcripts and more than 20% mitochondrial expression, and finally find 2000 most 
 # variable features in the matrix.
 done_list <- c()
-MTgenes <- c('Atp8','Atp6','COX1','COX2','COX3','CYTB','ND1','ND2','ND3','ND4L','ND4','ND5','ND6','Rnr2')
 
 # Old cells.
 for (x in seurat_list[1:6]){
@@ -29,8 +28,7 @@ for (x in seurat_list[1:6]){
   names(age) <- colnames(x)
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
-  MTgenes_x <- MTgenes[MTgenes %in% rownames(x)]
-  x[['P.Mito']] <- PercentageFeatureSet(x, features = MTgenes_x)
+  x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
   x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
@@ -42,8 +40,7 @@ for (x in seurat_list[7:12]){
   names(age) <- colnames(x)
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
-  MTgenes_x <- MTgenes[MTgenes %in% rownames(x)]
-  x[['P.Mito']] <- PercentageFeatureSet(x, features = MTgenes_x)
+  x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
   x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
