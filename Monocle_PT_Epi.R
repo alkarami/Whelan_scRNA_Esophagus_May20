@@ -127,6 +127,7 @@ monocon <- function(o){
   all.mono <- newimport(o, import_all = T)
   # Pre-process
   all.mono <- estimateSizeFactors(all.mono)
+  all.mono <- estimateDispersions(all.mono)
   ## FOLLOW DPFEATURE PROCEDURE
   
   # Preprocessing
