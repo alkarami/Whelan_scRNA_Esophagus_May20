@@ -3,12 +3,12 @@ library(Seurat)
 library(dplyr)
 
 ## Get inDrop files. 
-all_files <- list.files('R/Whelan_scRNA/CountedFiles_Matrix/.')
+all_files <- list.files('WT_Matrices/.')
 
 ## Initialize file list and upload all files. 
 seurat_list <- c()
 for (x in all_files){
-  y <- paste0('R/Whelan_scRNA/CountedFiles_Matrix/',x)
+  y <- paste0('WT_Matrices/',x)
   z <- read.table(file = y, sep = '\t', header = T, row.names = 1, as.is = T)
   seurat_list <- append(seurat_list,CreateSeuratObject(z, assay = "RNA",
                                                        min.cells = 0, min.features = 3, names.field = 1,
@@ -18,18 +18,17 @@ for (x in all_files){
 ## QC and pre-process for all files.
 # Pre-process: Add metadata to each file, normalize the matrices with log1p transformation (NormalizeData()), calculate percentage
 # of transcripts expressing mitochondrial genes as percent of total cell expression (PercentageFeatureSet()), subset cells with
-# less than 250 or more than 2500 unique transcripts and more than 20% mitochondrial expression, and finally find 2000 most 
-# variable features in the matrix.
+# less than 250 or more than 2500 unique transcripts and finally find 2000 most variable features in the matrix.
 done_list <- c()
 
 # Old cells.
 for (x in seurat_list[1:6]){
-  age <- sample(c("Old"),size = length(colnames(x)),replace = TRUE)
+  age <- sample(c("AGed"),size = length(colnames(x)),replace = TRUE)
   names(age) <- colnames(x)
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
   x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
-  x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- subset(x, subset = nFeature_RNA < 250 & nFeature_RNA > 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
 }
@@ -40,8 +39,7 @@ for (x in seurat_list[7:12]){
   names(age) <- colnames(x)
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
-  x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
-  x <- subset(x, subset = P.Mito < 20 & nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- subset(x, subset = nFeature_RNA < 250 & nFeature_RNA > 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
 }
@@ -66,8 +64,9 @@ DimPlot(ovy.int, split.by = 'Age')
 ## Perform post-clustering QC.
 # Unique transcripts.
 VlnPlot(ovy.int, features = c('nFeature_RNA'))
-# Mitochondrial expression.
+# Mitochondrial expression. Most of the distribution seems to stay around the 0-20% mark. Subset out cells with >20% percentage.
 VlnPlot(ovy.int, features = c('P.Mito'))
+ovy.int <- subset(ovy.int, subset = P.Mito < 20)
 # Sample-wise cell distribution in clusters. 
 DimPlot(ovy.int, group.by = 'orig.ident')
 
