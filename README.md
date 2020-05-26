@@ -24,6 +24,6 @@ Subread (2.0): http://subread.sourceforge.net/
 
 R: 
 
-Seurat (3.1.4): https://satijalab.org/seurat/
+Seurat (3.1.1): https://satijalab.org/seurat/
 
 Monocle (2.16.0): http://cole-trapnell-lab.github.io/monocle-release/docs_mobile/
