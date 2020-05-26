@@ -28,7 +28,7 @@ for (x in seurat_list[1:6]){
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
   x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
-  x <- subset(x, subset = nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- subset(x, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
 }
@@ -39,7 +39,7 @@ for (x in seurat_list[7:12]){
   names(age) <- colnames(x)
   x <- AddMetaData(x,status,col.name = 'Age')
   x <- NormalizeData(x)
-  x <- subset(x, subset = nFeature_RNA < 250 & nFeature_RNA > 2500)
+  x <- subset(x, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
   done_list <- append(done_list,x)
 }
@@ -51,7 +51,7 @@ DefaultAssay(ovy.int) <- "integrated"
 ## Scale the integrated data matrix.
 ovy.int <- ScaleData(ovy.int, verbose = FALSE)
 ## Perform PCA and produce the first 20 principal components.
-ovy.int <- RunPCA(ovy.int, npcs = 20, verbose = FALSE)
+ovy.int <- RunPCA(ovy.int, npcs = 30, verbose = FALSE)
 ## Perform UMAP from the resulting PCA PC's.
 ovy.int <- RunUMAP(ovy.int, reduction = "pca", dims = 1:20)
 ## Construct SNN to calculate clusters of cells. 
