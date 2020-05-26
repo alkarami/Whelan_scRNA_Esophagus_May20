@@ -12,40 +12,33 @@ for (x in all_files){
   z <- read.table(file = y, sep = '\t', header = T, row.names = 1, as.is = T)
   seurat_list <- append(seurat_list,CreateSeuratObject(z, assay = "RNA",
                                                        min.cells = 0, min.features = 0, names.field = 1,
-                                                       names.delim = "_", meta.data = NULL))
+                                                       names.delim = "_", meta.data = NULL, project = x))
 }
 
 ## QC and pre-process for all files.
 # Pre-process: Add metadata to each file, normalize the matrices with log1p transformation (NormalizeData()), calculate percentage
 # of transcripts expressing mitochondrial genes as percent of total cell expression (PercentageFeatureSet()), subset cells with
-# less than 250 or more than 2500 unique transcripts and finally find 2000 most variable features in the matrix.
-done_list <- c()
+# less than 250 or more than 2500 unique transcripts and finally find 2000 most variable features in the matrix. For a permissive 
+# initial clustering and our interest in mitochondrial function, high mitochondria-expressing cells are not yet subsetted out.
 
-# Old cells.
-for (x in seurat_list[1:6]){
-  age <- sample(c("AGed"),size = length(colnames(x)),replace = TRUE)
-  names(age) <- colnames(x)
-  x <- AddMetaData(x,status,col.name = 'Age')
-  x <- NormalizeData(x)
-  x[['P.Mito']] <- PercentageFeatureSet(x, pattern = '^mt-')
-  x <- subset(x, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
-  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
-  done_list <- append(done_list,x)
-}
+aged <- merge(seurat_list[[1]], unlist(seurat_list[2:6]), merge.data = T, project = 'Aged')
+age <- sample(c("Aged"),size = length(colnames(aged)),replace = TRUE)
+names(age) <- colnames(aged)
+aged <- AddMetaData(aged,age,col.name = 'Age')
+aged <- subset(aged, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
+aged <- NormalizeData(aged)
+aged <- FindVariableFeatures(aged, selection.method = "vst", nfeatures = 2000)
 
-# Young cells.
-for (x in seurat_list[7:12]){
-  age <- sample(c("Young"),size = length(colnames(x)),replace = TRUE)
-  names(age) <- colnames(x)
-  x <- AddMetaData(x,status,col.name = 'Age')
-  x <- NormalizeData(x)
-  x <- subset(x, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
-  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
-  done_list <- append(done_list,x)
-}
+young <- merge(seurat_list[[7]], unlist(seurat_list[8:12]), merge.data = T, project = 'Young')
+age <- sample(c("Young"),size = length(colnames(young)),replace = TRUE)
+names(age) <- colnames(young)
+young <- AddMetaData(young,age,col.name = 'Age')
+young <- subset(young, subset = nFeature_RNA > 250 & nFeature_RNA < 2500)
+young <- NormalizeData(young)
+young <- FindVariableFeatures(young, selection.method = "vst", nfeatures = 2000)
 
 ## Get anchors & integrate data according to the anchors.
-int.anchors <- FindIntegrationAnchors(object.list = done_list, dims = 1:30)
+int.anchors <- FindIntegrationAnchors(object.list = list(aged,young), dims = 1:30)
 ovy.int <- IntegrateData(anchorset = int.anchors, dims = 1:30)
 DefaultAssay(ovy.int) <- "integrated"
 ## Scale the integrated data matrix.
