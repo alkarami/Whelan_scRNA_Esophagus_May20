@@ -138,7 +138,6 @@ monocon <- function(o){
   # Run tSNE, perform dimensionality reduction and regress out batch effects from samples.
   all.mono <- reduceDimension(all.mono,
                               norm_method = 'log',
-                              num_dim = 3,
                               reduction_method = 'tSNE',
                               residualModelFormulaStr = '~orig.ident',
                               verbose = T)
@@ -159,7 +158,7 @@ monocon <- function(o){
                       ordering_genes = all.mono_ordering_genes)
   
   all.mono <-
-    reduceDimension(all.mono, reduction_method = "DDRTree", residualModelFormulaStr = "~Donor+Time")
+    reduceDimension(all.mono, reduction_method = "DDRTree")
   
   all.mono <-
     orderCells(all.mono)
