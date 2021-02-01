@@ -57,9 +57,7 @@ DimPlot(ovy.int, split.by = 'Age')
 # Unique transcripts.
 VlnPlot(ovy.int, features = c('nFeature_RNA'))
 # Mitochondrial expression. Most of the distribution seems to stay around the 0-20% mark. Subset out cells with >20% percentage.
-MTgenes <- c('Atp8','Atp6','COX1','COX2','COX3','CYTB','ND1','ND2','ND3','ND4L','ND4','ND5','ND6','Rnr2')
-MTgenes <- MTgenes[which(MTgenes %in% rownames(ovy.int))]
-ovy.int[['P.Mito']] <- PercentageFeatureSet(ovy.int, features = MTgenes)
+ovy.int[['P.Mito']] <- PercentageFeatureSet(ovy.int, pattern= '^mt-')
 VlnPlot(ovy.int, features = c('P.Mito'))
 ovy.int <- subset(ovy.int, subset = P.Mito < 20)
 # Sample-wise cell distribution in clusters. 
