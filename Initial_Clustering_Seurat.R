@@ -1,6 +1,5 @@
 ## Packages.
 library(Seurat)
-library(dplyr)
 
 ## Get inDrop files. 
 all_files <- list.files('WT_Matrices/.')
@@ -58,6 +57,9 @@ DimPlot(ovy.int, split.by = 'Age')
 # Unique transcripts.
 VlnPlot(ovy.int, features = c('nFeature_RNA'))
 # Mitochondrial expression. Most of the distribution seems to stay around the 0-20% mark. Subset out cells with >20% percentage.
+MTgenes <- c('Atp8','Atp6','COX1','COX2','COX3','CYTB','ND1','ND2','ND3','ND4L','ND4','ND5','ND6','Rnr2')
+MTgenes <- MTgenes[which(MTgenes %in% rownames(ovy.int))]
+ovy.int[['P.Mito']] <- PercentageFeatureSet(ovy.int, features = MTgenes)
 VlnPlot(ovy.int, features = c('P.Mito'))
 ovy.int <- subset(ovy.int, subset = P.Mito < 20)
 # Sample-wise cell distribution in clusters. 
@@ -100,9 +102,9 @@ for (x in cc.genes$g2m.genes){
   g2mgenes <- append(g2mgenes,paste(substring(x,1,1),tolower(substring(x,2)), sep = ''))
 }
 # Calculate S phase and G2/M scores for each cell. 
-ovy.epi <- CellCycleScoring(ovy.epi, s.features = sgenes, g2m.features = g2mgenes, set.ident = F)
+ovy.int <- CellCycleScoring(ovy.int, s.features = sgenes, g2m.features = g2mgenes, set.ident = F)
 # Visualize cell cycle phases.
-DimPlot(ovy.epi, group.by = 'Phase')
+DimPlot(ovy.int, group.by = 'Phase')
 
 ## Subset out immune cells for epithelium-exclusive downstream analyses and save.
 ovy.epi <- subset(ovy.int, idents = c('Basal-1','Basal-2','Basal-3','Basal-4','Basal-5','Suprabasal','Superficial-1','Superficial-2'))
