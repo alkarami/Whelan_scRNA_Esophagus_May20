@@ -37,8 +37,8 @@ young <- NormalizeData(young)
 young <- FindVariableFeatures(young, selection.method = "vst", nfeatures = 2000)
 
 ## Get anchors & integrate data according to the anchors.
-int.anchors <- FindIntegrationAnchors(object.list = list(aged,young), dims = 1:30)
-ovy.int <- IntegrateData(anchorset = int.anchors, dims = 1:30)
+int.anchors <- FindIntegrationAnchors(object.list = list(aged,young), dims = 1:20)
+ovy.int <- IntegrateData(anchorset = int.anchors, dims = 1:20)
 DefaultAssay(ovy.int) <- "integrated"
 ## Scale the integrated data matrix.
 ovy.int <- ScaleData(ovy.int, verbose = FALSE)
