@@ -1,0 +1,91 @@
+library(Seurat)
+
+trimmed.files <- list()
+for(x in list.files('scRNA_Aging_1/Trimmed', full.names = T)[1:4]){
+  y <- Read10X(x)
+  pname <- strsplit(x,'/')[[1]][3]
+  pname <- strsplit(pname,'-')[[1]][1]
+  z <- CreateSeuratObject(y, project = pname)
+  Age <- sample(c("Aged"),size = ncol(z),replace = TRUE)
+  names(Age) <- colnames(z)
+  z <- AddMetaData(z, Age, col.name = "Age")
+  z <- PercentageFeatureSet(z, pattern = "mt-", col.name = "percent.mt")
+  print(paste(ncol(z),'cells','in',pname,sep = ' '))
+  trimmed.files <- append(trimmed.files,z)
+}
+for(x in list.files('scRNA_Aging_1/Trimmed', full.names = T)[5:8]){
+  y <- Read10X(x)
+  pname <- strsplit(x,'/')[[1]][3]
+  pname <- strsplit(pname,'-')[[1]][1]
+  z <- CreateSeuratObject(y, project = pname)
+  Age <- sample(c("Young"),size = ncol(z),replace = TRUE)
+  names(Age) <- colnames(z)
+  z <- AddMetaData(z, Age, col.name = "Age")
+  z <- PercentageFeatureSet(z, pattern = "mt-", col.name = "percent.mt")
+  print(paste(ncol(z),'cells','in',pname,sep = ' '))
+  trimmed.files <- append(trimmed.files,z)
+}
+
+trimmeds <- merge(trimmed.files[[1]],trimmed.files[2:8])
+VlnPlot(trimmeds, features = c('nFeature_RNA','nCount_RNA','percent.mt'), pt.size = 0)
+rm(trimmeds)
+
+for(x in 1:8){
+  y <- trimmed.files[[x]]
+  y <- subset(y, subset = percent.mt < 10)
+  y <- NormalizeData(y, verbose = F)
+  y <- FindVariableFeatures(y, selection.method = 'vst', nfeatures = 2000)
+  trimmed.files[[x]] <- y
+}
+
+features.aging <- SelectIntegrationFeatures(object.list = trimmed.files)
+
+anchors.aging <- FindIntegrationAnchors(object.list = trimmed.files, anchor.features = features.aging)
+aging.combined <- IntegrateData(anchorset = anchors.aging)
+
+DefaultAssay(aging.combined) <- "integrated"
+
+aging.combined <- ScaleData(aging.combined, verbose = FALSE)
+aging.combined <- RunPCA(aging.combined, npcs = 30, verbose = FALSE)
+aging.combined <- RunUMAP(aging.combined, reduction = "pca", dims = 1:30)
+aging.combined <- FindNeighbors(aging.combined, reduction = "pca", dims = 1:30)
+aging.combined <- FindClusters(aging.combined, resolution = 0.4)
+
+DimPlot(aging.combined, split.by = "Age", label = T)
+
+save(aging.combined, file = 'scRNA_Aging_1/aging.combined')
+
+AllMarkers <- FindAllMarkers(aging.combined, assay = 'RNA')
+AllMarkers <- AllMarkers[AllMarkers$p_val_adj<0.05,]
+
+library(dplyr)
+heatmarkers <-AllMarkers %>% group_by(cluster) %>% top_n(n = 4, wt = avg_log2FC) 
+avex <- AverageExpression(aging.combined, assays = 'RNA', return.seurat = T)
+avex <- ScaleData(avex, features = heatmarkers$gene)
+DoHeatmap(avex, features = heatmarkers$gene, label = F, slot = 'scale.data', draw.lines = F, assay = 'RNA')  
+
+aging.combined <- ProjectDim(aging.combined, reduction = 'umap')
+DimHeatmap(object = aging.combined, reduction = 'umap', projected = T, dims = 1, cells = 1000, balanced = T, fast = F)
+
+DefaultAssay(aging.combined) <- 'RNA'
+FeaturePlot(aging.combined, features = c('Krt5','Adh7','Krtdap'))
+
+library(reshape)
+cpt <- prop.table(table(aging.combined$seurat_clusters, aging.combined$orig.ident), margin = 2)
+cpt <- melt(cpt)
+cpt$Age <- c(rep('Aged',68),rep('Young',68))
+cpt$Age <- factor(cpt$Age, levels = c('Young','Aged'))
+colnames(cpt) <- c('Cluster','Sample','Proportion','Age')
+
+library(ggpubr)
+ggboxplot(cpt, x = "Age", y = "Proportion",color = "Age", add = 'jitter', palette = 'lancet')+
+  stat_compare_means(label.y = 0.25, size = 3)+ 
+  facet_wrap(~Cluster)
+
+AgeMarkers <- FindMarkers(aging.combined, group.by = 'Age', ident.1 = 'Aged', assay = 'RNA')
+AgeMarkers <- AgeMarkers[AgeMarkers$p_val_adj<0.05,]
+
+VlnPlot(aging.combined, features = c('mt-Nd1','mt-Co1','mt-Co2','mt-Atp6','mt-Co3','mt-Nd3','mt-Nd4','mt-Cytb'), 
+        group.by = 'Age', pt.size = 0)
+
+save(aging.combined, file = 'scRNA_Aging_1/aging.combined')
